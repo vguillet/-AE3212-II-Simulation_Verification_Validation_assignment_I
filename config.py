@@ -1,22 +1,25 @@
+length_unit = "mm"
+angle_unit = "radian"
+
 nb_of_slices = 10
 
-ca = 0.605
-la = 2.661
+ca = 605
+la = 2661
 
-x1 = 0.172
-x2 = 1.211
-x3 = 2.591
-xa = 0.35
+x1 = 172
+x2 = 1211
+x3 = 2591
+xa = 350
 
-ha = 0.20
-tsk = 0.0011
-tsp = 0.0028
-tst = 0.0012
-hst = 0.016
-wst = 0.019
-nst = 15          # Odd number!
-d1 = 0.01154
-d3 = 0.01840
+ha = 205
+tsk = 1.1
+tsp = 2.8
+tst = 1.2
+hst = 16
+wst = 19
+nst = 25        # Odd number!
+d1 = 11.54
+d3 = 18.40
 theta = 28
 p = 97400
-q = 5540
+q = 5.54        # N/mm
