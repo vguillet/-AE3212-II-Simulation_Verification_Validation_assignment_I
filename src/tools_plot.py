@@ -3,6 +3,18 @@ from src.class_SLICE import *
 from src.class_RIB import *
 
 
+def plot_y_internal_forces(internal_z):
+    plt.plot(internal_z)
+    plt.scatter([range(len(internal_z))], internal_z)
+
+    plt.title("z-internal loads over the aileron span")
+    plt.xlabel("x position (m)")
+    plt.ylabel("Internal z-load (N)")
+
+    plt.grid()
+    plt.show()
+
+
 def plot_3d_aileron(model):
     # 3D plot of aileron discretisation
     from mpl_toolkits.mplot3d import Axes3D
@@ -41,5 +53,4 @@ def plot_le_te_deflection(le_deflection, te_deflection, x_position):
 
     plt.legend()
     plt.grid()
-
     plt.show()

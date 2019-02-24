@@ -1,3 +1,4 @@
+from config import *
 
 
 class Rib:
@@ -6,30 +7,41 @@ class Rib:
         self.label = label
         self.x_location = x_location
 
+        self.x_internal_load = 0
+        self.y_internal_load = 0
+        self.z_internal_load = 0
+
+        self.x_internal_moment = 0
+        self.y_internal_moment = 0
+        self.z_internal_moment = 0
+
+
     def calc_shear(self):
         # TODO: Implement shear calc
         return
 
 
 class Hinged_rib(Rib):
-    def __init__(self, label, x_location, deflection):
+    def __init__(self, label, x_location, deflection, x_load=0, y_load=0, z_load=0):
         Rib.__init__(self, label, x_location)
 
         self.deflection = deflection
-        # TODO: Implement y-load based on deflection calc
+
+        self.x_load = x_load
+        self.y_load = y_load
+        self.z_load = z_load
 
     def __repr__(self):
         return "Hinged rib " + str(self.label)
 
 
 class Actuator_rib(Rib):
-    def __init__(self, label, x_location, actuator_jammed=False):
+    def __init__(self, label, x_location, x_load=0, y_load=0, z_load=0):
         Rib.__init__(self, label, x_location)
 
-        if actuator_jammed:
-            self.z_load = 0
-        else:
-            self.z_load = 97400
+        self.x_load = x_load
+        self.y_load = y_load
+        self.z_load = z_load
 
     def __repr__(self):
         return "Actuator rib " + str(self.label)

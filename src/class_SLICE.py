@@ -7,10 +7,18 @@ import matplotlib.pyplot as plt
 
 
 class Slice:
-    def __init__(self, label, x_location):
+    def __init__(self, label=None, x_location=0):
         # TODO: Add material properties in inputs
         self.label = label
         self.x_location = x_location
+
+        self.x_internal_load = 0
+        self.y_internal_load = 0
+        self.z_internal_load = 0
+
+        self.x_internal_moment = 0
+        self.y_internal_moment = 0
+        self.z_internal_moment = 0
 
         # --- Setup boom structure
         self.construct_boom_structure()
@@ -52,8 +60,6 @@ class Slice:
             stiffener_count += 2
             front_stiffeners -= 2
             boom_z += self.stiffener_pitch
-
-            print(r - (r * cos(boom_z / r)))
 
             circ_booms.append(Boom(-(r * sin(boom_z / r)), r - (r * cos(boom_z / r)), "Stringer", front_stiffeners))
             circ_booms.append(Boom((r * sin(boom_z / r)), r - (r * cos(boom_z / r)), "Stringer", front_stiffeners-1))
@@ -257,7 +263,6 @@ class Slice:
 
         self.polar_I_uv = self.I_u + self.I_v
         self.polar_I_zy = self.I_zz + self.I_yy
-
         return
 
     def plot_boom_structure(self):
@@ -284,7 +289,7 @@ class Slice:
         for i, txt in enumerate(label_spar):
             plt.annotate(txt, (z_spar[i], y_spar[i]))
 
-        i = 3
+        i = 1
         upper_half_z = [ca]
         upper_half_y = [0]
 
@@ -320,20 +325,20 @@ class Simple_slice(Slice):
         Slice.__init__(self, label, x_location)
 
         self.x_load = 0
-        self.y_load = None
-        self.z_load = None
+        self.y_load = 0
+        self.z_load = 0
 
     def __repr__(self):
         return "Simple slice " + str(self.label)
 
 
 class Hinged_slice(Slice):
-    def __init__(self, label, x_location):
+    def __init__(self, label, x_location, x_load=0, y_load=0, z_load=0):
         Slice.__init__(self, label, x_location)
 
-        self.x_load = 0
-        self.y_load = None
-        self.z_load = None
+        self.x_load = x_load
+        self.y_load = y_load
+        self.z_load = z_load
 
     def __repr__(self):
         return "Hinged slice " + str(self.label)

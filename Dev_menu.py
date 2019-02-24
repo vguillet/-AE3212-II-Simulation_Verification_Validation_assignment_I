@@ -1,24 +1,49 @@
 from src.tools_plot import *
+
+import src.force_calculations_v2 as fc
+import src.moment_calculations as mc
+
 from src.class_RIB import *
 from src.class_SLICE import *
 
-# _________________________________ Define basic model parameters
 from config import *
+# _________________________________ Calculate reaction forces iteratively
 
-# --------- Auto parameters
+
+def reaction_forces():
+    FY = fc.Y_force(n_steps=10000, plot=False, info=False, ret=True)
+    FZ = fc.Z_force(FY, n_steps=10000, plot=False, info=False, ret=True)
+    return FY, FZ
+
+
+def torque_calc():
+    FY, FZ = reaction_forces()
+    mc.moment_calc(FY, FZ)
+
+
+fz, fy = reaction_forces()
+# torque_calc()
+
+fx = [0, 0, 0, 0, 0]
+
+print("\n=========================================================")
+print("                 Reaction forces found!")
+print("=========================================================\n")
+
+# _________________________________ Define basic model generation parameters
 slice_interval = la/nb_of_slices
 
 # _________________________________ Gen. initial aileron discretisation
 model = list()
 
-# --------- Adding ribs to model and setting actuator status
-model.append(Hinged_rib("A", x1, d1))
-model.append(Actuator_rib("B", x2-(xa/2), True))
-model.append(Actuator_rib("C", x2+(xa/2), False))
-model.append(Hinged_rib("D", x3, d3))
+# --------- Adding ribs and hinged slice to model and setting actuator status
+model.append(Hinged_rib("A", x1, d1, x_load=fx[0], y_load=fy[0], z_load=fz[0]))
+model.append(Actuator_rib("B", x2-(xa/2), x_load=fx[1], y_load=fy[1], z_load=fz[1]))
 
-# --------- Adding hinged slice
-model.append(Hinged_slice(1, x2))
+model.append(Hinged_slice(1, x2, x_load=fx[2], y_load=fy[2], z_load=fz[2]))
+
+model.append(Actuator_rib("C", x2+(xa/2), x_load=fx[3], y_load=fy[3], z_load=fz[3]))
+model.append(Hinged_rib("D", x3, d3, x_load=fx[4], y_load=fy[4], z_load=fz[4]))
 
 # --------- Adding simple slices to model
 loc = -slice_interval
@@ -40,16 +65,36 @@ x_lst = []
 for i in range(len(model)):
     x_lst.append(model[i].x_location)
 
-# _________________________________ Calculate reaction forces interatively
+# _________________________________ Calculate internal forces in every slice
+# --- Calc. y internal forces
+for i in range(len(model)-1):
+    # print(model[i].y_load)
+    model[i+1].y_internal_load = -(-model[i].y_internal_load + model[i+1].y_load - q*(model[i+1].x_location - model[i].x_location))
+
+# --- Calc. z internal forces
+for i in range(len(model)-1):
+    # print(model[i].z_load)
+    model[i+1].z_internal_load = -(-model[i].z_internal_load + model[i+1].z_load)
+
+internal_y = []
+internal_z = []
+
+for slice_point in model:
+    internal_y.append(slice_point.y_internal_load)
+    internal_z.append(slice_point.z_internal_load)
+
+plot_y_internal_forces(internal_z)
 
 # ============================================ Print/Plot functions
 # --------- Print model layout
-print(model)
+print("Model structure:", model)
+
+print("\n---------------------------------------------------------\n")
 
 test_slice = Slice("Test Slice", None)
 
 # --------- Plot aileron cross-section and print positions of booms
-print("\nThe following excludes Spar positions:")
+print("The following excludes Spar positions:")
 print("Stringer z-position ("+length_unit+"):", test_slice.z_positions_stringers)
 print("Stringer y-position ("+length_unit+"):", test_slice.y_positions_stringers)
 
@@ -57,7 +102,9 @@ print("\nThe following contains all booms location (including spar booms)")
 print("Booms z-position ("+length_unit+"):", test_slice.booms_z_positions)
 print("Booms y-position ("+length_unit+"):", test_slice.booms_y_positions)
 
-print("\nStiffener pitch ("+length_unit+"):", test_slice.stiffener_pitch)
+print("\n---------------------------------------------------------\n")
+
+print("Stiffener pitch ("+length_unit+"):", test_slice.stiffener_pitch)
 print("Small pitch ("+length_unit+"):", test_slice.small_pitch)
 print("Large pitch ("+length_unit+"):", test_slice.large_pitch)
 
@@ -69,7 +116,7 @@ print("Area stiffener ("+length_unit+"^2):", test_slice.area_stiffener)
 
 print("\nMoment of inertia (reference axis system):")
 print("Moment of inertia z ("+length_unit+"^4):", "%e" % test_slice.I_zz)
-print("Moment of inertia y ("+length_unit+"^4):", "%e" %  test_slice.I_yy)
+print("Moment of inertia y ("+length_unit+"^4):", "%e" % test_slice.I_yy)
 
 print("\nMoment of inertia (aileron axis system):")
 print("Moment of inertia u ("+length_unit+"^4):",  "%e" % test_slice.I_u)
