@@ -13,9 +13,9 @@ theta_max = theta*np.pi/180 # [rad]
 hinge = ha/2
 act = hinge*np.sqrt(2)
 
-Iyy = cross_section.I_yy    # [mm**4]
-Izz = cross_section.I_zz    # [mm**4]
-J = Izz + Iyy
+I1_zz = cross_section.I_yy    # [mm**4]
+I1_yy = cross_section.I_zz    # [mm**4]
+J = I1_yy + I1_zz
 
 sc = 106.12931274441615 # [mm] shear center distance from LE
 

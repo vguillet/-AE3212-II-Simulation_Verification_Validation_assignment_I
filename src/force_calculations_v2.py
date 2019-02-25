@@ -11,8 +11,8 @@ cross_section = Slice()
 theta_max = theta*np.pi/180    # [rad]
 P = p
 
-Iyy = cross_section.I_yy    # [mm**4]
-Izz = cross_section.I_zz    # [mm**4]
+I1_zz = cross_section.I_yy    # [mm**4]
+I1_yy = cross_section.I_zz    # [mm**4]
 
 sc = 106.12931274441615     # [mm] shear center distance from LE
 hinge = ha/2
@@ -76,7 +76,7 @@ def Y_force(n_steps=1000, plot=True, info=True, ret=False):
             moment[i] = moment[i-1] - shear[i]*dx
             
             # ANGLE INTEGRATION #
-            angle[i] = angle[i-1] + moment[i]*dx/(E*Iyy)
+            angle[i] = angle[i-1] + moment[i]*dx/(E*I1_zz)
             
             # DISPLACEMENT INTEGRATION #
             y_disp[i] = y_disp[i-1] + angle[i]*dx
@@ -98,9 +98,9 @@ def Y_force(n_steps=1000, plot=True, info=True, ret=False):
         print("Calculated forces in y direction in "+str(itteration)+" itterations, final error: "+str(error)+" mm")
         #print("F1y = "+str(F1)+" F2y = "+str(F2)+" F3y = "+str(F3))
     if plot:
-        par = y_disp
+        par = shear
         axis = [0]*len(x_pos)       
-        h = np.arange(min(y_disp),max(y_disp),(max(par)-min(par))/10)
+        h = np.arange(min(par),max(par),(max(par)-min(par))/10)
         h1x = [x1]*len(h)
         h2x = [x2]*len(h)
         h3x = [x3]*len(h)
@@ -108,7 +108,7 @@ def Y_force(n_steps=1000, plot=True, info=True, ret=False):
         h2a = [xa2]*len(h)
         
         plt.figure()        
-        plt.plot(x_pos, y_disp)
+        plt.plot(x_pos, par)
         plt.plot(h1x, h, h2x, h, h3x, h, c="g")
         plt.plot(h1a, h, h2a, h, c="y")
         plt.plot(x_pos, axis, c="r")
@@ -188,7 +188,7 @@ def Z_force(FY, n_steps=1000, plot=True, info=True, ret=False):
             moment[i] = moment[i-1] + shear[i]*dx
             
             # ANGLE INTEGRATION #
-            angle[i] = angle[i-1] + moment[i]*dx/(E*Izz)
+            angle[i] = angle[i-1] + moment[i]*dx/(E*I1_yy)
             
             # DISPLACEMENT INTEGRATION #
             disp[i] = disp[i-1] + angle[i]*dx
@@ -229,6 +229,6 @@ def Z_force(FY, n_steps=1000, plot=True, info=True, ret=False):
     if ret:
         return([F1, R, F2, P, F3])
 
-#print(Y_force(plot=True, info=True, ret=True))
+# print(Y_force(plot=True, info=True, ret=True))
 #FY = [898063.8378819056, 0, -1560749.1474143378, 0, 677421.7095343104]
 #print(Z_force(FY, plot=True, info=True, ret=True))

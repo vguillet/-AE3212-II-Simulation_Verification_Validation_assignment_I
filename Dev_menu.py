@@ -21,7 +21,7 @@ def torque_calc():
     mc.moment_calc(FY, FZ)
 
 
-fz, fy = reaction_forces()
+fy, fz = reaction_forces()
 # torque_calc()
 
 fx = [0, 0, 0, 0, 0]
@@ -69,7 +69,7 @@ for i in range(len(model)):
 # --- Calc. y internal forces
 for i in range(len(model)-1):
     # print(model[i].y_load)
-    model[i+1].y_internal_load = -(-model[i].y_internal_load + model[i+1].y_load - q*(model[i+1].x_location - model[i].x_location))
+    model[i+1].y_internal_load = -(-model[i].y_internal_load + model[i+1].y_load + -q*(model[i+1].x_location - model[i].x_location))
 
 # --- Calc. z internal forces
 for i in range(len(model)-1):
@@ -83,7 +83,6 @@ for slice_point in model:
     internal_y.append(slice_point.y_internal_load)
     internal_z.append(slice_point.z_internal_load)
 
-plot_y_internal_forces(internal_z)
 
 # ============================================ Print/Plot functions
 # --------- Print model layout
@@ -104,6 +103,7 @@ print("Booms y-position ("+length_unit+"):", test_slice.booms_y_positions)
 
 print("\n---------------------------------------------------------\n")
 
+print("~~~~~~~~~~~~~~Physical properties:~~~~~~~~~~~~~~")
 print("Stiffener pitch ("+length_unit+"):", test_slice.stiffener_pitch)
 print("Small pitch ("+length_unit+"):", test_slice.small_pitch)
 print("Large pitch ("+length_unit+"):", test_slice.large_pitch)
@@ -111,7 +111,8 @@ print("Large pitch ("+length_unit+"):", test_slice.large_pitch)
 print("\nTrailing edge angle ("+angle_unit+"):", test_slice.angle_tail)
 print("Trailing edge angle (deg):", test_slice.angle_tail*180/pi)
 
-print("\nCentroid of section ("+length_unit+"):", test_slice.z_centroid)
+print("\n~~~~~~~~~~~~~~Geometry properties:~~~~~~~~~~~~~~")
+print("Centroid of section ("+length_unit+"):", test_slice.u_centroid)
 print("Area stiffener ("+length_unit+"^2):", test_slice.area_stiffener)
 
 print("\nMoment of inertia (reference axis system):")
@@ -125,7 +126,11 @@ print("Moment of inertia v ("+length_unit+"^4):",  "%e" % test_slice.I_v)
 print("\nPolar moment of inertia:")
 print("Polar moment of inertia J ("+length_unit+"^4):",  "%e" % test_slice.polar_I_zy)
 
+print("\nShear center u:", test_slice.shear_center_u)
 
+
+plot_internal_forces(internal_y, "y")
+plot_internal_forces(internal_z, "z")
 test_slice.plot_boom_structure()
 
 # --------- Plot aileron model structure
@@ -133,3 +138,7 @@ test_slice.plot_boom_structure()
 
 # --------- Plot leading/trailing edge deflections
 # plot_le_te_deflection(le_deflection, te_deflection, x_lst)
+
+
+
+
