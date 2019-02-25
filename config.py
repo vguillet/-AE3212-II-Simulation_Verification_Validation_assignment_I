@@ -1,7 +1,7 @@
 length_unit = "mm"
 angle_unit = "radian"
 
-nb_of_slices = 60
+nb_of_slices = 200
 
 ca = 605
 la = 2661
@@ -20,7 +20,7 @@ wst = 19
 nst = 15        # Odd number!
 d1 = 11.54
 d3 = 18.40
-theta = 28
+theta = 28      # Deg
 p = 97400
 q = 5.54        # N/mm
 

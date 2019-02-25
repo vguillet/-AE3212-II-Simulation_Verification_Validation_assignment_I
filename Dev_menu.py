@@ -16,13 +16,7 @@ def reaction_forces():
     return FY, FZ
 
 
-def torque_calc():
-    FY, FZ = reaction_forces()
-    mc.moment_calc(FY, FZ)
-
-
 fy, fz = reaction_forces()
-# torque_calc()
 
 fx = [0, 0, 0, 0, 0]
 
@@ -75,7 +69,26 @@ for i in range(len(model)-1):
 for i in range(len(model)-1):
     # print(model[i].z_load)
     model[i+1].z_internal_load = -(-model[i].z_internal_load + model[i+1].z_load)
+    
+# --- Calc. internal torque
+from src.moment_calculations import moment_calc
 
+feature_index = []
+x_separation = []
+
+for i in range(len(model)-1):
+    x_separation.append(model[i+1].x_location-model[i].x_location)
+
+for i in range(len(model)):
+    if type(model[i]) is not Simple_slice:
+        feature_index.append(i)
+
+torque_lst, theta_lst = moment_calc(fy, fz, x_separation, feature_index)
+
+
+
+
+# --- List results
 internal_y = []
 internal_z = []
 
@@ -129,9 +142,11 @@ print("Polar moment of inertia J ("+length_unit+"^4):",  "%e" % test_slice.polar
 print("\nShear center u:", test_slice.shear_center_u)
 
 
-plot_internal_forces(internal_y, "y")
-plot_internal_forces(internal_z, "z")
-test_slice.plot_boom_structure()
+# plot_internal_forces(internal_y, "y")
+# plot_internal_forces(internal_z, "z")
+# plot_internal_forces(torque_lst, "Torque")
+# plot_internal_forces(theta_lst, "Theta")
+# test_slice.plot_boom_structure()
 
 # --------- Plot aileron model structure
 # plot_3d_aileron(model)

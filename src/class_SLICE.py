@@ -21,6 +21,8 @@ class Slice:
         self.y_internal_moment = 0
         self.z_internal_moment = 0
 
+        self.x_torque = 0
+
         # --- Setup boom structure
         self.construct_boom_structure()
         # --- Calculate centroid
@@ -30,7 +32,7 @@ class Slice:
         # --- Calculate shear center
         self.calc_shear_center()
         # --- Calculate shear flow
-        self.calc_shear_flow()
+        # self.calc_shear_flow()
 
     def construct_boom_structure(self):
         #  ______________________________ Creating boom structure
@@ -244,28 +246,28 @@ class Slice:
         # print('---------------------------------------------------------------------')
 
         # then add all the moment of inertia together
-        I_zz = stif_zz + skin_zz + skin_stein + circ_zz + circ_stein + spar_zz + spar_stein
-        I_yy = stif_yy + skin_yy + circ_yy + spar_yy
+        I_u = stif_zz + skin_zz + circ_zz + spar_zz
+        I_v = stif_yy + skin_yy + skin_stein + circ_yy + circ_stein + spar_yy + spar_stein
 
         # print('Total moment of inertia:')
-        # print('I_zz =', '%e' % I_zz, 'mm^4, and I_yy =', '%e' % I_yy, 'mm^4')
+        # print('I_u =', '%e' % I_u, 'mm^4, and I_v =', '%e' % I_v, 'mm^4')
         # print('---------------------------------------------------------------------')
 
         # now switch to the new axis system
         phi = np.radians(28)  # aileron rot angle         [rad]
-        I_u = (I_zz + I_yy) / 2 + ((I_zz - I_yy) / 2) * np.cos(2 * phi)
-        I_v = (I_zz + I_yy) / 2 - ((I_zz - I_yy) / 2) * np.cos(2 * phi)
+        I_zz = (I_u + I_v) / 2 + ((I_u - I_v) / 2) * np.cos(2 * phi)
+        I_yy = (I_u + I_v) / 2 - ((I_u - I_v) / 2) * np.cos(2 * phi)
 
         # print('Total moment of inertia in the rotated axis system:')
         # print('I_u =', '%e' % I_u, 'mm^4, and I_v =', '%e' % I_v, 'mm^4')
         # print('---------------------------------------------------------------------')
 
         # Re-label MOI correctly
-        self.I_u = I_zz
-        self.I_v = I_yy
+        self.I_u = I_u
+        self.I_v = I_v
 
-        self.I_zz = I_u
-        self.I_yy = I_v
+        self.I_zz = I_zz
+        self.I_yy = I_yy
 
         self.polar_I_uv = self.I_u + self.I_v
         self.polar_I_zy = self.I_zz + self.I_yy
@@ -403,7 +405,6 @@ class Slice:
 
         # S_y/I_xzz
         # I_xx=161250000 #mm^4
-
 
         CGz = self.u_centroid
         spar_height = ha

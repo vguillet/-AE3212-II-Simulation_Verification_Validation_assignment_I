@@ -15,6 +15,7 @@ class Rib:
         self.y_internal_moment = 0
         self.z_internal_moment = 0
 
+        self.x_torque = 0
 
     def calc_shear(self):
         # TODO: Implement shear calc

@@ -5,7 +5,7 @@ from src.class_RIB import *
 
 def plot_internal_forces(internal_z, label):
     plt.plot(internal_z)
-    # plt.scatter([range(len(internal_z))], internal_z)
+    plt.scatter([range(len(internal_z))], internal_z)
 
     plt.title(label+"-internal loads over the aileron span")
     plt.xlabel("x position (m)")
