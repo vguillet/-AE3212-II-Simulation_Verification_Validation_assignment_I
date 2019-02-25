@@ -27,10 +27,53 @@ theta = 28
 P = 97.4e+3
 Ry = 100e+3
 Rz = 100e+3
+
+#
+#
+#
+#
+#
+#
+SCu = 106.12931274441615 #mm
+#
+#
+#
+#
+#
+#The Sy is equal to Vv and Sz is equal to Vu
+#Sy = Sv
+#Sz = Su
+Tx = 10000
+
 #Sum of forces in y and z
 Sy = Ry-P*math.sin(math.radians(theta))
 Sz = Rz+P*math.cos(math.radians(theta))
 
+#
+#
+#
+#
+#
+#Mz = 120
+#My = 100
+#Nstress = []
+#for i in range(0,17):
+#    stress = Mz/I_zz*y_pos[i] + My/I_yy*(z_pos[i]-CGz)
+#    Nstress.append(stress)
+#    
+#boomarea=[]
+#b1 = (t_1*stiffener_pitch)/6.0*(2+Nstress[1]/Nstress[0]) + (t_1*stiffener_pitch)/6.0*(2+Nstress[2]/Nstress[0])
+#boomarea.append(b1)
+#b2 = (t_1*stiffener_pitch)/6.0*(2+Nstress[0]/Nstress[1]) + (t_1*stiffener_pitch)/6.0*(2+Nstress[3]/Nstress[1])
+#boomarea.append(b2)
+#for i in range(0,8):
+#    j = 2 + i
+#    b = (t_1*stiffener_pitch)/6.0*(2.0+Nstress[j-2]/Nstress[j]) + (t_1*stiffener_pitch)/6.0*(2.0+Nstress[j+2]/Nstress[j])
+#    print j
+#    print(Nstress[j]/Nstress[j-2])
+#    boomarea.append(b)
+    
+    
 random.seed(9000)
 boomarea=[]
 for i in range (0,17):
@@ -38,6 +81,12 @@ for i in range (0,17):
     
 
 #print (boomarea)
+#
+#
+#
+#
+#
+#
 angle=math.degrees(0.2012196329874848)
 #print (angle)
 z_pos= [560.2076385798177, 560.2076385798177, 470.6229157394533, 
@@ -54,15 +103,15 @@ y_pos= [8.869774538649953, -8.869774538649953, 26.609323615949847,
 
 #print(y_pos)
 
-boomarea2 = []
-b1 = (t_1*stiffener_pitch)/6.0*(2.0+y_pos[1]/y_pos[0]) + stiffener_area + (t_1*stiffener_pitch)/6.0*(2.0+y_pos[2]/y_pos[0])
-boomarea2.append(b1)
-boomarea2.append(b1)
-for i in range(0,4):
-    j = 2+2*i
-    b2 = (t_1*stiffener_pitch)/6.0*(2.0+y_pos[j-2]/y_pos[j]) + stiffener_area + (t_1*stiffener_pitch)/6.0*(2.0+y_pos[j+2]/y_pos[j])   
-    boomarea2.append(b2)
-    boomarea2.append(b2)    
+#boomarea2 = []
+#b1 = (t_1*stiffener_pitch)/6.0*(2.0+y_pos[1]/y_pos[0]) + stiffener_area + (t_1*stiffener_pitch)/6.0*(2.0+y_pos[2]/y_pos[0])
+#boomarea2.append(b1)
+#boomarea2.append(b1)
+#for i in range(0,4):
+#    j = 2+2*i
+#    b2 = (t_1*stiffener_pitch)/6.0*(2.0+y_pos[j-2]/y_pos[j]) + stiffener_area + (t_1*stiffener_pitch)/6.0*(2.0+y_pos[j+2]/y_pos[j])   
+#    boomarea2.append(b2)
+#    boomarea2.append(b2)    
 
 
 q_bottom=[0]
@@ -73,7 +122,7 @@ for i in range(0,6):
     q_prev = q
     q_bottom.append(q)
 print(q_bottom)
-print(q_bottom[-1])
+print (q_bottom[-1])
 
 
 q_top=[]
@@ -103,26 +152,28 @@ print(q_curve)
 
 
 d=spar_height*math.sin(math.radians(90-angle))
-A1 = 1/4.0*math.pi*spar_height*spar_height*0.5
+A1 = 1.0/4.0*math.pi*spar_height*spar_height*0.5
 A2 = 0.5*spar_height*(C_a - 0.5*spar_height)
-
 #Moment around boom 14 by top CCW positive
 M1 = sum(q_top[0:5])*d*stiffener_pitch + q_top[5]*small_pitch*d
-
 #Moment by q12
 M2 = q_bottom[-1]*(y_pos[0]-y_pos[1])*(z_pos[0]-z_pos[14])
-
 #Moment by curved part
 M3 = -q_curve[1]*(y_pos[16]-y_pos[15])*(z_pos[13]-z_pos[15]) + q_curve[1]*(z_pos[15]-z_pos[16])*(y_pos[15]-y_pos[13])
 M4 = -q_curve[2]*(y_pos[14]-y_pos[16])*(z_pos[13]-z_pos[16]) - q_curve[2]*(z_pos[14]-z_pos[16])*(y_pos[16]-y_pos[13])
 M5 = -q_curve[3]*(y_pos[12]-y_pos[14])*(z_pos[13]-z_pos[14]) - q_curve[3]*(z_pos[12]-z_pos[14])*(y_pos[14]-y_pos[13])
-
 #Moments due to q_s0
 M6 = -2.0*A1 #times q_s01 
 M7 = -2.0*A2 #times q_s02
 
+#
+#
+#
+#
+#
 #Moments by external forces
-M = -Rz*0.5*spar_height - P*math.cos(math.radians(theta))*spar_height + P*math.sin(math.radians(theta))*(z_pos[13]-z_pos[16])
+#M = -Rz*0.5*spar_height - P*math.cos(math.radians(theta))*spar_height + P*math.sin(math.radians(theta))*(z_pos[13]-z_pos[16])
+M = -Sz*0.5*spar_height + Sy*(SCu-z_pos[13]) - Tx
 
 #Compute the angle of twist for curved cell (clockwise positive)
 k1 = sum(q_curve[1:3])*stiffener_pitch/t_1 + q_curve[3]*large_pitch/t_1 - q_spar[0]*spar_height/t_2
@@ -140,3 +191,15 @@ print (np.linalg.solve(A, B ))
 q_s0=np.linalg.solve(A,B)
 q_s01=q_s0[0][0]
 q_s02=q_s0[1][0]
+
+
+#Since the axial force in the skin is horizontal slightly left of the spar the shear flow in
+#the rib is just to compensate for the vertical components of the shearflows
+q1 = ((q_s01*(y_pos[15]-y_pos[13])) + ((q_curve[1]+q_s01)*(y_pos[16]-y_pos[15])) + ((q_curve[2]+q_s01)*(y_pos[14]-y_pos[16])) + ((q_curve[3]+q_s01)*(y_pos[12]-y_pos[14])))/spar_height
+q11 = (q_s01*spar_height + ((q_curve[1])*(y_pos[16]-y_pos[15])) + ((q_curve[2])*(y_pos[14]-y_pos[16])) + ((q_curve[3])*(y_pos[12]-y_pos[14])))/spar_height
+#Calculate q2 the shear flow in the rib slightly right of the spar
+P13z = ((2.0*q_s02*A2) + ((sum(q_top[0:5])*stiffener_pitch+small_pitch*q_top[-1])*d) + (q_bottom[-1]*stiffener_pitch/2.0*d))/spar_height
+P13y = P13z * math.tan(math.radians(angle))
+q2 = ((-q_s02*spar_height) + sum(q_bottom)*(y_pos[9]-y_pos[11]) + sum(q_top[0:5])*(y_pos[4]-y_pos[2]) + q_top[-1]*(y_pos[12]-y_pos[10]) - P13y)/spar_height
+
+

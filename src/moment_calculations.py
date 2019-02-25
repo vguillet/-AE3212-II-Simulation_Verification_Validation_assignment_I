@@ -14,8 +14,6 @@ def moment_calc(FY, FZ, x_pos, feature_lst):
     n_list = feature_lst
     n_steps = len(x_pos)
 
-    print(x_pos)
-
     # CONSTANTS #
     cross_section = Slice()
 
@@ -39,7 +37,7 @@ def moment_calc(FY, FZ, x_pos, feature_lst):
     torque = [0]*len(x_pos)
 
     for i in range(1, n_steps):
-        dx = x_pos[i]
+        dx = x_pos[i-1]
 
         # INTEGRATE MOMENTS TO GET TORQUES#
         torque[i] = torque[i-1] + q*arm_q*dx
@@ -53,12 +51,10 @@ def moment_calc(FY, FZ, x_pos, feature_lst):
         # INTEGRATE TORQUES TO GET THETA #
         theta_lst[i] = theta_lst[i-1] - torque[i]*dx/(G*J)
 
-
-    theta_adjustment = theta_lst[n_a1] - theta_max
+    theta_adjustment = theta_lst[n_a1] + theta_max
     theta_deg = theta_lst
     for i in range(0, n_steps):
         theta_lst[i] = theta_lst[i] - theta_adjustment
-        theta_deg[i] = theta_lst[i]*180/np.pi
+        theta_deg[i] = -theta_lst[i]*180/np.pi
 
-    plot_internal_forces(theta_deg, "theta")
     return torque, theta_deg

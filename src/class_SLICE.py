@@ -22,6 +22,7 @@ class Slice:
         self.z_internal_moment = 0
 
         self.x_torque = 0
+        self.displacement_theta = 0
 
         # --- Setup boom structure
         self.construct_boom_structure()

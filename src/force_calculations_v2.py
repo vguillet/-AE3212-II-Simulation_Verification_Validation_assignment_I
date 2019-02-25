@@ -11,10 +11,10 @@ cross_section = Slice()
 theta_max = theta*np.pi/180    # [rad]
 P = p
 
-I1_zz = cross_section.I_yy    # [mm**4]
-I1_yy = cross_section.I_zz    # [mm**4]
+I1_zz = cross_section.I_zz    # [mm**4]
+I1_yy = cross_section.I_yy    # [mm**4]
 
-sc = 106.12931274441615     # [mm] shear center distance from LE
+sc = cross_section.shear_center_u     # [mm] shear center distance from LE
 hinge = ha/2
 act = hinge*np.sqrt(2)
 

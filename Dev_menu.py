@@ -15,9 +15,9 @@ def reaction_forces():
     FZ = fc.Z_force(FY, n_steps=10000, plot=False, info=False, ret=True)
     return FY, FZ
 
-
 fy, fz = reaction_forces()
-
+print("fy", fy)
+print("fz", fz)
 fx = [0, 0, 0, 0, 0]
 
 print("\n=========================================================")
@@ -25,7 +25,7 @@ print("                 Reaction forces found!")
 print("=========================================================\n")
 
 # _________________________________ Define basic model generation parameters
-slice_interval = la/nb_of_slices
+slice_interval = la/(nb_of_slices-1)
 
 # _________________________________ Gen. initial aileron discretisation
 model = list()
@@ -40,10 +40,10 @@ model.append(Actuator_rib("C", x2+(xa/2), x_load=fx[3], y_load=fy[3], z_load=fz[
 model.append(Hinged_rib("D", x3, d3, x_load=fx[4], y_load=fy[4], z_load=fz[4]))
 
 # --------- Adding simple slices to model
-loc = -slice_interval
+loc = 0
 for i in range(nb_of_slices):
-    loc += slice_interval
     model.append(Simple_slice(i+1, loc))
+    loc += slice_interval
 
 # --------- Sort model points according to x position:
 n_times = len(model)
@@ -74,27 +74,35 @@ for i in range(len(model)-1):
 from src.moment_calculations import moment_calc
 
 feature_index = []
+feature = []
 x_separation = []
 
+count = 0
 for i in range(len(model)-1):
+    count += 1
     x_separation.append(model[i+1].x_location-model[i].x_location)
 
 for i in range(len(model)):
     if type(model[i]) is not Simple_slice:
         feature_index.append(i)
+        feature.append(model[i].label)
 
 torque_lst, theta_lst = moment_calc(fy, fz, x_separation, feature_index)
 
-
+for i in range(len(model)-1):
+    model[i+1].x_torque = torque_lst[i]
+    model[i+1].displacement_theta = theta_lst[i]
 
 
 # --- List results
 internal_y = []
 internal_z = []
+x_torque = []
 
 for slice_point in model:
     internal_y.append(slice_point.y_internal_load)
     internal_z.append(slice_point.z_internal_load)
+    x_torque.append(slice_point.x_torque)
 
 
 # ============================================ Print/Plot functions
@@ -142,11 +150,12 @@ print("Polar moment of inertia J ("+length_unit+"^4):",  "%e" % test_slice.polar
 print("\nShear center u:", test_slice.shear_center_u)
 
 
-# plot_internal_forces(internal_y, "y")
-# plot_internal_forces(internal_z, "z")
-# plot_internal_forces(torque_lst, "Torque")
-# plot_internal_forces(theta_lst, "Theta")
-# test_slice.plot_boom_structure()
+plot_internal_forces(internal_y, "y")
+plot_internal_forces(internal_z, "z")
+plot_internal_forces(x_torque, "Torque")
+plot_internal_forces(theta_lst, "Theta")
+
+test_slice.plot_boom_structure()
 
 # --------- Plot aileron model structure
 # plot_3d_aileron(model)
