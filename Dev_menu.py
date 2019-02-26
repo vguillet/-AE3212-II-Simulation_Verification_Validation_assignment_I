@@ -72,9 +72,6 @@ for i in range(len(model)):
         features.append(model[i])
         feature_index.append(i)
 
-
-print(features)
-
 # --- Calc. y/z internal forces and z internal moment
 for i in range(len(model)-1):
     model[i+1].y_internal_load = -(-model[i].y_internal_load + model[i+1].y_load + -q*(model[i+1].x_location - model[i].x_location))
@@ -159,9 +156,16 @@ for i in range(len(model)-1):
     if type(model[i+1]) is Rib:
         model[i+1].calc_shear_flow()
 
+print("Shear flow values:")
+for i in range(len(model)-1):
+    if type(model[i+1]) is Rib:
+        print("Shear flow in rib "+model[i+1].label+" (N/mm): q1 = "+str(round(model[i+1].q1))+", q2 = "+str(round(model[i+1].q2)))
+
+
 # ============================================ Print/Plot functions
 # --------- Print model layout
-print("Model structure:", model)
+# print("\n---------------------------------------------------------\n")
+# print("Model structure:", model)
 
 print("\n---------------------------------------------------------\n")
 
@@ -213,7 +217,7 @@ plot_internal_forces(m_internal_z, "z moment")
 # plot_internal_forces(x_torque, "Torque")
 # plot_internal_forces(theta_lst, "Theta")
 
-# test_slice.plot_boom_structure()
+test_slice.plot_boom_structure()
 
 # --------- Plot aileron model structure
 # plot_3d_aileron(model)

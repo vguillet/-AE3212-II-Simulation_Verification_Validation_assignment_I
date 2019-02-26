@@ -164,57 +164,51 @@ class Slice:
         t = tst  # thickness of stiffener    [mm]
 
         A_base = w * t  # area of the horiz. part   [mm^2]
-        A_top = (h - t) * t  # area of the vert. part    [mm^2]
+        A_top = h * t  # area of the vert. part    [mm^2]
         A_stif = A_base + A_top  # area of stiffener         [mm^2]
         self.area_stiffener = A_stif
 
-        # here are the z co-ordinates of the stiffeners             [mm]
-        #    stif_z  = [560.2076385798177, 560.2076385798177, 470.6229157394533, \
-        #               470.6229157394533, 381.0381928990888, 381.0381928990888, \
-        #               291.45347005872435, 291.45347005872435, 201.86874721835989, \
-        #               201.86874721835989, 112.28402437799541, 112.28402437799541, \
-        #               37.51424233216027, 37.51424233216027, 0]
-
-        # same in the y-axis                                        [mm]
-        #    stif_y  = [8.869774538649953, -8.869774538649953, 26.609323615949847, \
-        #               -26.609323615949847, 44.348872693249746, -44.348872693249746, \
-        #               62.08842177054964, -62.08842177054964, 79.82797084784953, \
-        #               -79.82797084784953, 97.56751992514943, -97.56751992514943, \
-        #               78.07387583997614, -78.07387583997614, 0]
-
-        #    angle   = 0.2012196329874848    # angle of skin             [rad]
-
         c_y = 0  # centroid y co-ord (symm)  [mm]
         c_z = self.u_centroid  # centroid z co-ord         [mm]
+        # c_z = ail_h / 2
+
         stif_zz = 0  # initial value mom inert   [mm^4]
         stif_yy = 0  # initial value mom inert   [mm^4]
 
+        for i in range(len(stif_y)):
+            if stif_y[i] < 0:
+                stif_y[i] = stif_y[i] + 3
+            elif stif_y[i] > 0:
+                stif_y[i] = stif_y[i] - 3
+
+        for i in range(len(stif_z)):
+            stif_z[i] = stif_z[i] - c_z
+
         # now calculate the Steiner terms for all stiffeners
         for i in range(len(stif_z)):
-            stein_z = A_stif * (stif_z[i] - c_y) ** 2
+            stein_z = A_stif * (stif_z[i]) ** 2
             stif_yy = stif_yy + stein_z
 
         for i in range(len(stif_y)):
-            stein_y = A_stif * (stif_y[i] - c_z) ** 2
+            stein_y = A_stif * (stif_y[i]) ** 2
             stif_zz = stif_zz + stein_y
 
-        # print('---------------------------------------------------------------------')
-        # print('Moment of inertia due to the Steiner term of stiffeners:')
-        # print('I_zz =', '%e' % stif_zz, 'mm^4, and I_yy =', '%e' % stif_yy, 'mm^4')
-        # print('---------------------------------------------------------------------')
-
-        skin_z = (ail_w - (ail_h / 2)) / 2  # skin centroid         [mm]
         skin_t = 1.1  # skin thickness        [mm]
         skin_l = np.sqrt((ail_w - (ail_h / 2)) ** 2 + (ail_h / 2) ** 2)  # skin length           [mm]
 
         # add the moment of inertia for the straight part of the skin
-        skin_zz = ((skin_t * skin_l ** 3) * np.cos(angle) ** 2) / 12
-        skin_yy = ((skin_t * skin_l ** 3) * np.sin(angle) ** 2) / 12
-        skin_stein = skin_t * skin_l * (skin_z - c_z) ** 2
+        skin_zz1 = ((skin_t * (skin_l / 2) ** 3) * np.sin(angle) ** 2) / 12
+        skin_yy1 = ((skin_t * (skin_l / 2) ** 3) * np.cos(angle) ** 2) / 12
+        skin_stein_1a = skin_t * skin_l * (np.cos(angle) * skin_l / 2) ** 2
+        skin_stein_1b = skin_t * skin_l * (np.sin(angle) * skin_l / 2) ** 2
 
-        # print('Moment of inertia due to the straight part of the skin:')
-        # print('I_zz =', '%e' % (skin_zz + skin_stein), 'mm^4, and I_yy =', '%e' % skin_yy, 'mm^4')
-        # print('---------------------------------------------------------------------')
+        skin_zz2 = ((skin_t * (skin_l / 2) ** 3) * np.sin(angle) ** 2) / 12
+        skin_yy2 = ((skin_t * (skin_l / 2) ** 3) * np.cos(angle) ** 2) / 12
+        skin_stein_2a = skin_t * skin_l * (np.cos(angle) * skin_l / 2) ** 2
+        skin_stein_2b = skin_t * skin_l * (-np.sin(angle) * skin_l / 2) ** 2
+
+        skin_zz = skin_zz1 + skin_zz2 + skin_stein_1b + skin_stein_2b
+        skin_yy = skin_yy1 + skin_yy2 + skin_stein_1a + skin_stein_2a
 
         z_out = (ail_h / 2) - (4 * ail_h / 2) / (3 * np.pi)  # centroid outer        [mm]
         z_in = (ail_h / 2) - (4 * (ail_h - skin_t) / 2) / (3 * np.pi)  # centroid inner        [mm]
@@ -227,10 +221,6 @@ class Slice:
         circ_yy = A_out * (ail_h / 2) ** 2 / 4 - A_in * ((ail_h - skin_t) / 2) ** 2 / 4
         circ_stein = (A_in + A_out) * (circ_z - c_z) ** 2
 
-        # print('Moment of inertia due to the circular part of the skin:')
-        # print('I_zz =', '%e' % (circ_zz + circ_stein), 'mm^4, and I_yy =', '%e' % circ_yy, 'mm^4')
-        # print('---------------------------------------------------------------------')
-
         spar_z = ail_h / 2  # centroid of the spar      [mm]
         spar_h = ail_h  # height of the spar        [mm]
         spar_t = 2.8  # thickness of spar         [mm]
@@ -240,28 +230,16 @@ class Slice:
         spar_yy = (spar_t * spar_h ** 3) / 12
         spar_stein = spar_h * spar_t * (spar_z - c_z) ** 2
 
-        # print('Moment of inertia due to the spar:')
-        # print('I_zz =', '%e' % (spar_zz + spar_stein), 'mm^4, and I_yy =', '%e' % spar_yy, 'mm^4')
-        # print('---------------------------------------------------------------------')
-
         # then add all the moment of inertia together
         I_u = stif_zz + skin_zz + circ_zz + spar_zz
-        I_v = stif_yy + skin_yy + skin_stein + circ_yy + circ_stein + spar_yy + spar_stein
-
-        # print('Total moment of inertia:')
-        # print('I_u =', '%e' % I_u, 'mm^4, and I_v =', '%e' % I_v, 'mm^4')
-        # print('---------------------------------------------------------------------')
+        I_v = stif_yy + skin_yy + circ_yy + circ_stein + spar_yy + spar_stein
 
         # now switch to the new axis system
         phi = np.radians(28)  # aileron rot angle         [rad]
         I_zz = (I_u + I_v) / 2 + ((I_u - I_v) / 2) * np.cos(2 * phi)
         I_yy = (I_u + I_v) / 2 - ((I_u - I_v) / 2) * np.cos(2 * phi)
+        J = I_yy + I_zz
 
-        # print('Total moment of inertia in the rotated axis system:')
-        # print('I_u =', '%e' % I_u, 'mm^4, and I_v =', '%e' % I_v, 'mm^4')
-        # print('---------------------------------------------------------------------')
-
-        # Re-label MOI correctly
         self.I_u = I_u
         self.I_v = I_v
 
@@ -658,14 +636,19 @@ class Rib(Slice):
         # the rib is just to compensate for the vertical components of the shearflows
         q1 = ((q_s01 * (y_pos[15] - y_pos[13])) + ((q_curve[1] + q_s01) * (y_pos[16] - y_pos[15])) + (
                 (q_curve[2] + q_s01) * (y_pos[14] - y_pos[16])) + ((q_curve[3] + q_s01) * (y_pos[12] - y_pos[14]))) / spar_height
+
         q11 = (q_s01 * spar_height + ((q_curve[1]) * (y_pos[16] - y_pos[15])) + ((q_curve[2]) * (y_pos[14] - y_pos[16])) + (
                 (q_curve[3]) * (y_pos[12] - y_pos[14]))) / spar_height
+
         # Calculate q2 the shear flow in the rib slightly right of the spar
         P13z = ((2.0 * q_s02 * A2) + ((sum(q_top[0:5]) * self.stiffener_pitch + self.small_pitch * q_top[-1]) * d) + (
                 q_bottom[-1] * self.stiffener_pitch / 2.0 * d)) / spar_height
         P13y = P13z * tan(radians(angle))
+
         q2 = ((-q_s02 * spar_height) + sum(q_bottom) * (y_pos[9] - y_pos[11]) + sum(q_top[0:5]) * (y_pos[4] - y_pos[2]) + q_top[-1] * (
                 y_pos[12] - y_pos[10]) - P13y) / spar_height
 
+        self.q1 = q1
+        self.q2 = q2
     def __repr__(self):
         return "Rib " + str(self.label)
