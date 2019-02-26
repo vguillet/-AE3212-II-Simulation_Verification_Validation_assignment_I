@@ -54,27 +54,14 @@ for i in range(n_times):
         if model[j].x_location > model[j+1].x_location:
             model[j], model[j+1] = model[j+1], model[j]
 
-# --------- List x positions
+# --------- List all x positions
 x_lst = []
 for i in range(len(model)):
     x_lst.append(model[i].x_location)
 
 # _________________________________ Calculate internal forces in every slice
-# --- Calc. y internal forces
-for i in range(len(model)-1):
-    # print(model[i].y_load)
-    model[i+1].y_internal_load = -(-model[i].y_internal_load + model[i+1].y_load + -q*(model[i+1].x_location - model[i].x_location))
-
-# --- Calc. z internal forces
-for i in range(len(model)-1):
-    # print(model[i].z_load)
-    model[i+1].z_internal_load = -(-model[i].z_internal_load + model[i+1].z_load)
-    
-# --- Calc. internal torque
-from src.moment_calculations import moment_calc
-
+features = []
 feature_index = []
-feature = []
 x_separation = []
 
 count = 0
@@ -84,8 +71,67 @@ for i in range(len(model)-1):
 
 for i in range(len(model)):
     if type(model[i]) is not Simple_slice:
+        features.append(model[i])
         feature_index.append(i)
-        feature.append(model[i].label)
+
+
+print(features)
+
+# --- Calc. y/z internal forces and z internal moment
+for i in range(len(model)-1):
+    model[i+1].y_internal_load = -(-model[i].y_internal_load + model[i+1].y_load + -q*(model[i+1].x_location - model[i].x_location))
+    model[i+1].z_internal_load = -(-model[i].z_internal_load + model[i+1].z_load)
+
+    fy1 = 0
+    fz1 = 0
+
+    fy2 = 0
+    fz2 = 0
+
+    fy3 = 0
+    fz3 = 0
+
+    fy4 = 0
+    fz4 = 0
+
+    fy5 = 0
+    fz5 = 0
+
+    if model[i+1].x_location > features[0].x_location:
+        fy1 = features[0].y_load
+        fz1 = features[0].z_load
+
+    if model[i+1].x_location > features[1].x_location:
+        fy2 = features[1].y_load
+        fz2 = features[1].z_load
+
+    if model[i+1].x_location > features[2].x_location:
+        fy3 = features[2].y_load
+        fz3 = features[2].z_load
+
+    if model[i+1].x_location > features[3].x_location:
+        fy4 = features[3].y_load
+        fz4 = features[3].z_load
+
+    if model[i+1].x_location > features[4].x_location:
+        fy5 = features[4].y_load
+        fz5 = features[4].z_load
+
+    model[i+1].y_internal_moment = -(fy1*(model[i+1].x_location - features[0].x_location)
+                                     + fy2 * (model[i + 1].x_location - features[1].x_location)
+                                     + fy3 * (model[i + 1].x_location - features[2].x_location)
+                                     + fy4 * (model[i + 1].x_location - features[3].x_location)
+                                     + fy5 * (model[i + 1].x_location - features[4].x_location)
+                                     - (q*model[i+1].x_location)*(model[i+1].x_location/2))
+
+    model[i+1].z_internal_moment = -(fz1*(model[i+1].x_location - features[0].x_location)
+                                     + fz2 * (model[i + 1].x_location - features[1].x_location)
+                                     + fz3 * (model[i + 1].x_location - features[2].x_location)
+                                     + fz4 * (model[i + 1].x_location - features[3].x_location)
+                                     + fz5 * (model[i + 1].x_location - features[4].x_location))
+
+# --- Calc. internal torque
+from src.moment_calculations import moment_calc
 
 torque_lst, theta_lst = moment_calc(fy, fz, x_separation, feature_index)
 
@@ -95,13 +141,19 @@ for i in range(len(model)-1):
 
 
 # --- List results
-internal_y = []
-internal_z = []
+f_internal_y = []
+f_internal_z = []
+m_internal_y = []
+m_internal_z = []
 x_torque = []
 
 for slice_point in model:
-    internal_y.append(slice_point.y_internal_load)
-    internal_z.append(slice_point.z_internal_load)
+    f_internal_y.append(slice_point.y_internal_load)
+    f_internal_z.append(slice_point.z_internal_load)
+
+    m_internal_y.append(slice_point.y_internal_moment)
+    m_internal_z.append(slice_point.z_internal_moment)
+
     x_torque.append(slice_point.x_torque)
 
 
@@ -147,15 +199,19 @@ print("Moment of inertia v ("+length_unit+"^4):",  "%e" % test_slice.I_v)
 print("\nPolar moment of inertia:")
 print("Polar moment of inertia J ("+length_unit+"^4):",  "%e" % test_slice.polar_I_zy)
 
-print("\nShear center u:", test_slice.shear_center_u)
+print("\nShear center u ("+length_unit+"^4):", test_slice.shear_center_u)
 
 
-plot_internal_forces(internal_y, "y")
-plot_internal_forces(internal_z, "z")
-plot_internal_forces(x_torque, "Torque")
-plot_internal_forces(theta_lst, "Theta")
+# plot_internal_forces(f_internal_y, "y load")
+# plot_internal_forces(f_internal_z, "z load")
 
-test_slice.plot_boom_structure()
+plot_internal_forces(m_internal_y, "y moment")
+plot_internal_forces(m_internal_z, "z moment")
+
+# plot_internal_forces(x_torque, "Torque")
+# plot_internal_forces(theta_lst, "Theta")
+
+# test_slice.plot_boom_structure()
 
 # --------- Plot aileron model structure
 # plot_3d_aileron(model)

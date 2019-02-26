@@ -194,11 +194,11 @@ class Slice:
         # now calculate the Steiner terms for all stiffeners
         for i in range(len(stif_z)):
             stein_z = A_stif * (stif_z[i] - c_y) ** 2
-            stif_zz = stif_zz + stein_z
+            stif_yy = stif_yy + stein_z
 
         for i in range(len(stif_y)):
             stein_y = A_stif * (stif_y[i] - c_z) ** 2
-            stif_yy = stif_yy + stein_y
+            stif_zz = stif_zz + stein_y
 
         # print('---------------------------------------------------------------------')
         # print('Moment of inertia due to the Steiner term of stiffeners:')
@@ -276,8 +276,9 @@ class Slice:
 
     def calc_shear_center(self):
 
-        # S_y/I_xzz
-        I_xx = 1565571000  # mm^4
+        # S_y/I_xz
+        I_xx = 1565571000
+        # I_xx = self.I_u  # mm^4
 
         spar_height = ha
         t_1 = tsk
@@ -601,6 +602,10 @@ class Slice:
 
         plt.plot(upper_half_z, upper_half_y, color="g")
         plt.plot(lower_half_z, lower_half_y, color="g")
+
+        plt.title("Cross-section boom structure of the aileron")
+        plt.xlabel("x (mm)")
+        plt.ylabel("y (mm)")
 
         plt.legend()
         plt.grid()
