@@ -1,13 +1,11 @@
 from src.tools_plot import *
 
 import src.force_calculations_v2 as fc
-import src.moment_calculations as mc
 
-from src.class_RIB import *
 from src.class_SLICE import *
 
 from config import *
-# _________________________________ Calculate reaction forces iteratively
+# ============================================ Calculate reaction forces iteratively
 
 
 def reaction_forces():
@@ -16,28 +14,28 @@ def reaction_forces():
     return FY, FZ
 
 fy, fz = reaction_forces()
-print("fy", fy)
-print("fz", fz)
+# print("fy", fy)
+# print("fz", fz)
 fx = [0, 0, 0, 0, 0]
 
 print("\n=========================================================")
 print("                 Reaction forces found!")
 print("=========================================================\n")
 
-# _________________________________ Define basic model generation parameters
+# ============================================ Define basic model generation parameters
 slice_interval = la/(nb_of_slices-1)
 
 # _________________________________ Gen. initial aileron discretisation
 model = list()
 
 # --------- Adding ribs and hinged slice to model and setting actuator status
-model.append(Hinged_rib("A", x1, d1, x_load=fx[0], y_load=fy[0], z_load=fz[0]))
-model.append(Actuator_rib("B", x2-(xa/2), x_load=fx[1], y_load=fy[1], z_load=fz[1]))
+model.append(Rib("A", x1, deflection=d1, x_load=fx[0], y_load=fy[0], z_load=fz[0]))
+model.append(Rib("B", x2-(xa/2), x_load=fx[1], y_load=fy[1], z_load=fz[1]))
 
 model.append(Hinged_slice(1, x2, x_load=fx[2], y_load=fy[2], z_load=fz[2]))
 
-model.append(Actuator_rib("C", x2+(xa/2), x_load=fx[3], y_load=fy[3], z_load=fz[3]))
-model.append(Hinged_rib("D", x3, d3, x_load=fx[4], y_load=fy[4], z_load=fz[4]))
+model.append(Rib("C", x2+(xa/2), x_load=fx[3], y_load=fy[3], z_load=fz[3]))
+model.append(Rib("D", x3, deflection=d3, x_load=fx[4], y_load=fy[4], z_load=fz[4]))
 
 # --------- Adding simple slices to model
 loc = 0
@@ -156,6 +154,10 @@ for slice_point in model:
 
     x_torque.append(slice_point.x_torque)
 
+# ============================================ Calc. internal shear
+for i in range(len(model)-1):
+    if type(model[i+1]) is Rib:
+        model[i+1].calc_shear_flow()
 
 # ============================================ Print/Plot functions
 # --------- Print model layout

@@ -1,7 +1,7 @@
 length_unit = "mm"
 angle_unit = "radian"
 
-nb_of_slices = 200
+nb_of_slices = 2000
 
 ca = 605
 la = 2661

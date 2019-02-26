@@ -1,7 +1,5 @@
 import matplotlib.pyplot as plt
 from src.class_SLICE import *
-from src.class_RIB import *
-
 
 def plot_internal_forces(internal_z, label):
     plt.plot(internal_z)
